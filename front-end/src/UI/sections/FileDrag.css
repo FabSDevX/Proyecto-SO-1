@@ -1,0 +1,46 @@
+.dg-container{
+    display: flex;
+    margin: 0 auto;
+    max-width: 1024px;
+    flex-direction: column;
+}
+
+.dg-title{
+    display: flex;
+    justify-content: center;
+    font-size: x-large;
+    margin-bottom: 0.6rem;
+    text-wrap: wrap;
+}
+
+.dg-actor{
+    display: flex;
+    align-items: center;
+    height: 10vh;
+    border: 3px dashed #01E576;
+    padding: 3rem;
+    border-radius: 40px;
+    flex-direction: column;
+    font-size: 16px;
+}
+
+.dg-button{
+    background-color: #01E576;
+    border-radius: .7rem;
+    color: #111;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 1.2rem 2.2rem;
+}
+
+.dg-button:hover{
+    background-color: #00A884;
+    color: white;
+    transition: 0.4s ease;
+}
+@media screen and (max-width: 1024px) {
+    .dg-actor{
+        border: none;
+        border-radius: 0px;
+    }
+  }
