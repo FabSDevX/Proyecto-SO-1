@@ -45,7 +45,7 @@ export function FileDrag() {
   });
 
   return (
-    <div className="dg-container">
+    <section className="dg-container">
       {window.innerWidth >= 600 ? (
         <label className="dg-title">Subir o arrastrar el archivo</label>
       ) : (
@@ -68,6 +68,6 @@ export function FileDrag() {
       <span className="dg-span-note">
         Formatos aceptados son .txt, .jpg, .png, .jpeg, .opus
       </span>
-    </div>
+    </section>
   );
 }

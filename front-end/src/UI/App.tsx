@@ -1,10 +1,11 @@
-import './App.css'
-import { FileDrag } from './sections/FileDrag'
+import './App.css';
+import { FileDrag } from './sections/FileDrag';
+import { Hero } from "./sections/Hero";
 
 function App() {
   return (
     <>
-      Hola mundo
+      <Hero/>
       <FileDrag/>
     </>
   )
