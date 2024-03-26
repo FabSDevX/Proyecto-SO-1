@@ -10,12 +10,14 @@
     justify-content: center;
     font-size: x-large;
     margin-bottom: 0.6rem;
+    font-weight: bold;
     text-wrap: wrap;
 }
 
 .dg-actor{
     display: flex;
     align-items: center;
+    justify-content: center;
     height: 10vh;
     border: 3px dashed #01E576;
     padding: 3rem;
@@ -44,9 +46,25 @@
     color: white;
     transition: 0.4s ease;
 }
-@media screen and (max-width: 1024px) {
+
+.dg-span-note{
+    font-size: 12px;
+    color: #555;
+    margin: 5px auto;
+}
+
+@media screen and (max-width: 600px) {
+    .dg-title{
+        margin-bottom: 15px;
+    }
+
     .dg-actor{
         border: none;
-        border-radius: 0px;
+        padding: 0px;
+        height: fit-content;
+    }
+
+    .dg-span-note{
+        margin: 15px auto 15px auto;
     }
   }
