@@ -9,5 +9,14 @@ export default defineConfig({
     alias: {
       '@assets': '/src/assets' 
     }
-  }
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://192.168.1.188:5000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
 });

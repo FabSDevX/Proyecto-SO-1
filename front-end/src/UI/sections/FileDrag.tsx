@@ -5,8 +5,6 @@ import { useDropzone } from "react-dropzone";
 
 export function FileDrag() {
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
-    console.log(acceptedFiles);
-
     const acceptedImgsFormats = ["png", "jpg", "jpeg", "webp"];
     const chat: File[] = acceptedFiles.filter((text) =>
       text.name.endsWith(".txt")
@@ -20,9 +18,53 @@ export function FileDrag() {
       audio.name.endsWith(".opus")
     );
 
-    console.log(chat);
-    console.log(imgs);
-    console.log(audios);
+    async function obtainPlainTextPromise(promise: Promise<string>) {
+      try {
+        const result = await promise;
+        return result;
+      } catch (error) {
+        console.error("Critical Error obtaining promise:", error);
+      }
+    }
+
+    async function textAnalysis() {
+      if (chat.length > 0) {
+        const promise = chat[0].text();
+        let text = await obtainPlainTextPromise(promise);
+        text = text?.trimEnd();
+        console.log(text);
+
+        try {
+          const response = await fetch(
+            "http://192.168.1.188:5000/api/classify",
+            {
+              method: "POST",
+              body: JSON.stringify({
+                text: text,
+              }),
+              headers: {
+                "Content-type": "application/json; charset=UTF-8",
+              },
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log(data);
+          } else {
+            console.error("Request error:", response.status);
+          }
+        } catch (error) {
+          console.error("Process request error:", error);
+        }
+      }
+    }
+
+    textAnalysis();
+
+    // console.log(chat);
+    // console.log(imgs);
+    // console.log(audios);
     // acceptedFiles.forEach((file) => {
     //     const reader = new FileReader()
     //     console.log(reader)
