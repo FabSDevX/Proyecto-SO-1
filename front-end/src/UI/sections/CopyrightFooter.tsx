@@ -5,8 +5,6 @@ export function CopyrightFooter() {
         backgroundColor: "#111",
         width: "100%",
         height: "10vh",
-        left: "0",
-        bottom: "0",
       }}
     >
       <p
