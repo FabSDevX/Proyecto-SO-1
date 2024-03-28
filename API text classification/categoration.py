@@ -10,7 +10,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
 
 # Instantiates a client
-language_client = language_v2.LanguageServiceClient(client_options={"api_key": os.getenv("API_KEY"), "quota_project_id": os.getenv("quota_project_id")})
+language_client = language_v2.LanguageServiceClient(client_options={"api_key": os.getenv("API_KEY"), "quota_project_id": os.getenv("QUOTA_PROJECT_ID")})
 
 def classify(text):
     """Classify the input text into categories."""
