@@ -1,64 +1,74 @@
+import os
+import uuid
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from dotenv import load_dotenv
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from msrest.authentication import CognitiveServicesCredentials
-
 from azure.storage.blob import BlobServiceClient
 
+# .env
+load_dotenv()
 
-#------------------------------------Cloud Storage credentials and clients---------------------------------
-#Pegue aquí el connection_string para poder ver el funcionamiento
+app = Flask(__name__)
+CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+
+# Cloud Storage credentials and clients
+connection_string = os.getenv('CONNECTION_STRING')
 blob_service_client = BlobServiceClient.from_connection_string(connection_string)
 container_name = "myimagecontainer"
 container_client = blob_service_client.get_container_client(container_name)
 
+# Computer Vision credentials and client
+endpoint = os.getenv('ENDPOINT')
+api_key = os.getenv('API_KEY')
+computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(api_key))
 
-#------------------------------------Image describer and analyser AI (Computer Vision) Credentials---------------------------------
-#Pegue aquí el ENDPOINT y el API_KEY para poder ver el funcionamiento
+@app.route('/', methods=['GET'])
+def index():
+    return 'Hello Image'
 
-
-def describe_images(image_path):
-
-    #Esta sección del código se encarga de subir a la nube que creé la imagen del path dado, para poder obtener una URL de la misma.
-    #Deberíamos Generar una función que tome todas las imagenes que se subieron a la pagina y subirlas todas a la nube de esta forma.
-    blob_name = "BeerGuy.jpeg"  # TODO: Aquí es importante que el nombre sea distinto para cada imagen
-
-    blob_client = blob_service_client.get_blob_client(container= container_name, blob=blob_name)
-
-    with open(image_path, "rb") as image_file:
-        blob_client.upload_blob(image_file)
-    print(f"Image '{blob_name}' uploaded successfully!")
-    #Entonces este de arriba código de arriba podemos sacarlo a otra función diferente que vaya cargando cada imagen de una a una a la nube
+@app.route('/api/upload_and_describe_image', methods=['POST'])
+def upload_and_describe_image():
+    try:
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image provided'}), 400
 
 
+        building_text = ""
+        print(request.files.items)
+        for key in request.files.to_dict(flat=False):
+            for value in request.files.getlist(key):
+                image_file = value
+                # image_file = request.files['image']
+                if image_file.filename == '':
+                    return jsonify({'error': 'No selected image'}), 400
+                                
+                # Save the image to a temporary location
+                image_path = 'API image-to-text/temp/uploaded_image.jpg'
+                image_file.save(image_path)
+                # Generate a unique blob name using UUID
+                blob_name = str(uuid.uuid4()) + ".jpg"
 
-    #Esta sección que queda de la función va tomando todas las imágenes y las va analizando de una a una. Aquí la idea sería que en lugar
-    #de imprimir la descripción con el "description_results.captions[0].text", que lo peguemos todo junto en el archivo de texto que
-    #vamos a mandar al analizador de texto de Google.
-    computervision_client = ComputerVisionClient(ENDPOINT, CognitiveServicesCredentials(API_KEY))
-    blob_list = container_client.list_blobs() 
+                # Upload image to Azure Blob Storage
+                blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+                with open(image_path, "rb") as image:
+                    blob_client.upload_blob(image)
 
-    for blob in blob_list:
-        blob_url = "https://describedimages.blob.core.windows.net/myimagecontainer/" + blob.name
+                # Describe the uploaded image
+                blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
+                description_results = computervision_client.describe_image(blob_url)
+                if description_results.captions:
+                    building_text += description_results.captions[0].text + '\n'
+                else:
+                    building_text += "No description found." + ' \n '
 
-        description_results = computervision_client.describe_image(blob_url)
+                # Delete the uploaded image from Blob Storage
+                blob_client.delete_blob()
 
-        if description_results.captions:
-            print(description_results.captions[0].text)
-        else:
-            print("No description found.")
+        return jsonify({'description': building_text})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-#This function deletes every image in the cloud to keep it clean after doing the uploading and analizing process    
-def delete_all_blobs():
-    blob_list = container_client.list_blobs()  
-
-    for blob in blob_list:
-        blob_client = container_client.get_blob_client(blob.name)
-        blob_client.delete_blob()    
-
-# Copie el path de alguna de las imagenes y lo pega ahí, se tiene que usar la barra inclinada "/".
-# Ahora mismo solo le va a devolver el resultado de una imagen como es lógico, la idea como expliqué arriba, es tomar el path de todas
-# las imagenes que nos den los usuarios e ir de una a una cargandolas en la nube en otra función, por lo que la llamada de la función
-# "describe_images" de abajo se hará sin parámetros en el futuro.         
-image_path = "C:/Users/Usuario/OneDrive/Escritorio/Trabajos/Pruebas Python/depositphotos_73308229-stock-photo-happy-man-drinking-beer-at.jpg"
-describe_images(image_path)
-
-delete_all_blobs()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)

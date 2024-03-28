@@ -61,9 +61,30 @@ export function FileDrag() {
       if (audios.length > 0) {
         const formData = new FormData();
         audios.forEach((audio) => {
-          formData.append('audio_file', audio);
+          formData.append("audio_file", audio);
         });
-        fetch("http://localhost:5000/api/transcribe", {
+        fetch("http://192.168.1.188:5000/api/transcribe", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    }
+
+    async function imagsAnalysis() {
+      if (imgs.length > 0) {
+        console.log(imgs[0])
+        const formData = new FormData();
+        imgs.forEach((img) => {
+          formData.append('image', img);
+        });
+        fetch("http://192.168.1.188:5000/api/upload_and_describe_image", {
           method: "POST",
           body: formData,
         })
@@ -78,24 +99,9 @@ export function FileDrag() {
     }
 
     //textAnalysis();
-    audioAnalysis();
+    //audioAnalysis();
+    imagsAnalysis();
 
-    // console.log(chat);
-    // console.log(imgs);
-    console.log(audios);
-    // acceptedFiles.forEach((file) => {
-    //     const reader = new FileReader()
-    //     console.log(reader)
-    //     reader.onabort = () => console.log('file reading was aborted')
-    //     reader.onerror = () => console.log('file reading has failed')
-    //     reader.onload = () => {
-    //     // Do whatever you want with the file contents
-    //       const binaryStr = reader.result
-    //       console.log(binaryStr)
-    //     }
-    //     //reader.readAsText(file)
-    //     //reader.readAsArrayBuffer(file)
-    //   })
   }, []);
 
   /*Props of Dropzone dependency*/
