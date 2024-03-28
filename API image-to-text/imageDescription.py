@@ -11,7 +11,7 @@ from azure.storage.blob import BlobServiceClient
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+CORS(app)
 
 # Cloud Storage credentials and clients
 connection_string = os.getenv('CONNECTION_STRING')
