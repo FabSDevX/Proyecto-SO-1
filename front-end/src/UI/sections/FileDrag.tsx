@@ -30,10 +30,7 @@ export function FileDrag() {
     async function textAnalysis() {
       if (chat.length > 0) {
         const promise = chat[0].text();
-        let text = await obtainPlainTextPromise(promise);
-        text = text?.trimEnd();
-        console.log(text);
-
+        const text = await obtainPlainTextPromise(promise);
         try {
           const response = await fetch(
             "http://192.168.1.188:5000/api/classify",
@@ -60,11 +57,32 @@ export function FileDrag() {
       }
     }
 
-    textAnalysis();
+    async function audioAnalysis() {
+      if (audios.length > 0) {
+        const formData = new FormData();
+        audios.forEach((audio) => {
+          formData.append('audio_file', audio);
+        });
+        fetch("http://localhost:5000/api/transcribe", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data);
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+    }
+
+    //textAnalysis();
+    audioAnalysis();
 
     // console.log(chat);
     // console.log(imgs);
-    // console.log(audios);
+    console.log(audios);
     // acceptedFiles.forEach((file) => {
     //     const reader = new FileReader()
     //     console.log(reader)

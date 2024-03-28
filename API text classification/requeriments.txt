@@ -2,3 +2,4 @@ pip install flask
 pip install google-cloud-language
 pip install python-dotenv
 pip install Flask-CORS
+pip install assemblyai
