@@ -3,9 +3,8 @@ export function CopyrightFooter() {
     <footer
       style={{
         backgroundColor: "#111",
-        position: "fixed",
         width: "100%",
-        height: "5vh",
+        height: "10vh",
         left: "0",
         bottom: "0",
       }}
@@ -20,6 +19,7 @@ export function CopyrightFooter() {
           fontWeight: "100",
           opacity: "0.67",
           margin: "0",
+          height: "100%",
         }}
       >
         © Fabricio Porras Morera & Carlos Solis Mora

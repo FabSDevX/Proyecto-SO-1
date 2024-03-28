@@ -50,7 +50,7 @@
 .dg-span-note{
     font-size: 15px;
     color: #555;
-    margin: 5px auto;
+    margin: 5px auto 15px auto;
 }
 
 @media screen and (max-width: 750px) {
