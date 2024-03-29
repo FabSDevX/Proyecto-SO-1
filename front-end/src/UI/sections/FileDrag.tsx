@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 
 export function FileDrag() {
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
+    const SERVER_IP = "http://192.168.1.188:5000"
     const acceptedImgsFormats = ["png", "jpg", "jpeg", "webp"];
     const chat: File[] = acceptedFiles.filter((text) =>
       text.name.endsWith(".txt")
@@ -33,7 +34,7 @@ export function FileDrag() {
         const text = await obtainPlainTextPromise(promise);
         try {
           const response = await fetch(
-            "http://192.168.1.188:5000/api/classify",
+            `${SERVER_IP}/api/classify`,
             {
               method: "POST",
               body: JSON.stringify({
@@ -63,7 +64,7 @@ export function FileDrag() {
         audios.forEach((audio) => {
           formData.append("audio_file", audio);
         });
-        fetch("http://192.168.1.188:5000/api/transcribe", {
+        fetch(`${SERVER_IP}/api/transcribe`, {
           method: "POST",
           body: formData,
         })
@@ -84,7 +85,7 @@ export function FileDrag() {
         imgs.forEach((img) => {
           formData.append('image', img);
         });
-        fetch("http://192.168.1.188:5000/api/upload_and_describe_image", {
+        fetch(`${SERVER_IP}/api/upload_and_describe_image`, {
           method: "POST",
           body: formData,
         })
@@ -98,9 +99,9 @@ export function FileDrag() {
       }
     }
 
-    //textAnalysis();
+    textAnalysis();
     //audioAnalysis();
-    imagsAnalysis();
+    //imagsAnalysis();
 
   }, []);
 
