@@ -22,11 +22,15 @@ def classify(text):
 
     result = {}
 
-    for category in categories:
+    for category in categories[:3]:
         # Turn the categories into a dictionary of the form:
         # {category.name: category.confidence}, so that they can
         # be treated as a sparse vector.
-        result[category.name] = category.confidence
+        singleCategories = category.name.split("/")
+        if((singleCategories[len(singleCategories) - 1])== "Other"):
+            result[singleCategories[len(singleCategories) - 2]] = category.confidence
+        else:
+            result[singleCategories[len(singleCategories) - 1]] = category.confidence
 
     return result
 
