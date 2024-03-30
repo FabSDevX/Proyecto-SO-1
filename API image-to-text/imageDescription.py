@@ -34,9 +34,8 @@ def upload_and_describe_image():
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
 
-
+       
         building_text = ""
-        print(request.files.items)
         for key in request.files.to_dict(flat=False):
             for value in request.files.getlist(key):
                 image_file = value
@@ -45,11 +44,12 @@ def upload_and_describe_image():
                     return jsonify({'error': 'No selected image'}), 400
                                 
                 # Save the image to a temporary location
-                image_path = 'API image-to-text/temp/uploaded_image.jpg'
+                image_path = 'temp/' + str(uuid.uuid4()) +'.jpg'
+                print(image_path)
                 image_file.save(image_path)
                 # Generate a unique blob name using UUID
                 blob_name = str(uuid.uuid4()) + ".jpg"
-
+                
                 # Upload image to Azure Blob Storage
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
                 with open(image_path, "rb") as image:
@@ -65,10 +65,11 @@ def upload_and_describe_image():
 
                 # Delete the uploaded image from Blob Storage
                 blob_client.delete_blob()
+                
 
         return jsonify({'description': building_text})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5002, debug=True)

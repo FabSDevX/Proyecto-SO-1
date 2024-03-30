@@ -21,7 +21,6 @@ def classify(text):
     categories = response.categories
 
     result = {}
-
     for category in categories[:3]:
         # Turn the categories into a dictionary of the form:
         # {category.name: category.confidence}, so that they can

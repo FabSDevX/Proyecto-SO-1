@@ -1,4 +1,5 @@
 import os
+import uuid
 import assemblyai as aai
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -25,18 +26,16 @@ def transcribe_audio():
         if 'audio_file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
         building_text = ""
-        print(request.files.items)
         for key in request.files.to_dict(flat=False):
             for value in request.files.getlist(key):
                 audio_file = value
-                file_path = 'API audio-speech/temp/temp_audio.opus'  # Change to your desired temporary path
+                file_path = 'temp'+str(uuid.uuid4())+audio_file.filename+'.opus'  # Change to your desired temporary path
                 # Save the file temporarily
                 audio_file.save(file_path)
                 # Transcribe audio
                 transcript = transcriber.transcribe(file_path)
                 building_text += transcript.text + '\n'
                 # Remove temporary file
-                print(transcript.text)
                 os.remove(file_path)
 
         # Return transcription result
@@ -45,4 +44,4 @@ def transcribe_audio():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5001, debug=True)
