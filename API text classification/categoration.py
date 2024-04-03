@@ -13,15 +13,19 @@ CORS(app)
 language_client = language_v2.LanguageServiceClient(client_options={"api_key": os.getenv("API_KEY"), "quota_project_id": os.getenv("QUOTA_PROJECT_ID")})
 
 def classify(text):
+    print(text)
     """Classify the input text into categories."""
     document = language_v2.Document(
         content=text, type_=language_v2.Document.Type.PLAIN_TEXT
     )
     response = language_client.classify_text(request={"document": document})
     categories = response.categories
-
+    print(categories)
     result = {}
+    if(len(categories)==0):
+        result["Imagen poco descriptiva"] = 0
     for category in categories[:3]:
+        
         # Turn the categories into a dictionary of the form:
         # {category.name: category.confidence}, so that they can
         # be treated as a sparse vector.
@@ -30,7 +34,7 @@ def classify(text):
             result[singleCategories[len(singleCategories) - 2]] = category.confidence
         else:
             result[singleCategories[len(singleCategories) - 1]] = category.confidence
-
+    print(result)
     return result
 
 @app.route('/', methods=['GET'])

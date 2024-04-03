@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 
 export function FileDrag() {
   const [navigated, setNavigated] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [chatData, setChatData] = useState<File[] | null>(null);
   const [imgData, setImgData] = useState<File[] | null>(null);
   const [audioData, setAudioData] = useState<File[] | null>(null);
@@ -24,6 +26,7 @@ export function FileDrag() {
     }
   };
   const onDrop = useCallback((acceptedFiles: Array<File>) => {
+    setLoading(true);
     const acceptedImgsFormats = ["png", "jpg", "jpeg", "webp"];
     const chat: File[] = acceptedFiles.filter((text) =>
       text.name.endsWith(".txt")
@@ -36,10 +39,16 @@ export function FileDrag() {
     const audios: File[] = acceptedFiles.filter((audio) =>
       audio.name.endsWith(".opus")
     );
+    console.log("Cantidad de chats: ", chat.length)
+    console.log("Cantidad de imagenes: ", imgs.length)
+    console.log("Cantidad de audios: ", audios.length)
 
     setChatData(chat);
     setImgData(imgs);
     setAudioData(audios);
+
+    setLoading(false);
+    setLoaded(true);
   }, []);
 
   /*Props of Dropzone dependency*/
@@ -47,7 +56,6 @@ export function FileDrag() {
     onDrop,
     noClick: true,
   });
-
 
   return (
     <>
@@ -75,9 +83,15 @@ export function FileDrag() {
           Formatos aceptados son .txt, .jpg, .png, .jpeg, .opus
         </span>
 
-        <button onClick={navigateToReports} disabled={navigated}>
-          Ir a Nueva Ruta
-        </button>
+        {loading ? (
+          <p>Cargando archivos...</p>
+        ) : (
+          loaded && (
+            <button className="FileDrag-btn" onClick={navigateToReports}>
+              Procesar
+            </button>
+          )
+        )}
       </section>
     </>
   );

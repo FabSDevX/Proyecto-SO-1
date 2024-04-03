@@ -55,9 +55,18 @@
     color: white;
   }
   
-  
+
   .stats-container {
     padding: 16px;
     flex: 1;
+    width: 600px;
+    height: 500px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
-  
+
+  .stats-paragraph {
+    font-size: 25px;
+    font-weight: bold;
+  }

@@ -29,7 +29,8 @@ def transcribe_audio():
         for key in request.files.to_dict(flat=False):
             for value in request.files.getlist(key):
                 audio_file = value
-                file_path = 'temp'+str(uuid.uuid4())+audio_file.filename+'.opus'  # Change to your desired temporary path
+                file_path = 'temp'+str(uuid.uuid4())+audio_file.filename 
+                print(file_path)
                 # Save the file temporarily
                 audio_file.save(file_path)
                 # Transcribe audio

@@ -11,30 +11,58 @@ interface StatsProps {
 export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
   const [selectedOption, setSelectedOption] =
     useState<string>("Conversaciones");
-    // const [textResult, setTextResult] = useState<string>('');
-    // const [audioResult, setAudioResult] = useState<string>('');
-    // const [imgsResult, setImgsResult] = useState<string>('');
-  const [chartData, setChartData] = useState<{
+    const [textResult, setTextResult] = useState<{
     categories: string[];
     confidence: number[];
   }>({ categories: [], confidence: [] });
-  const SERVER_IP = "http://192.168.1.188";
-
+    const [audioResult, setAudioResult] = useState<{
+    categories: string[];
+    confidence: number[];
+  }>({ categories: [], confidence: [] });
+    const [imgsResult, setImgsResult] = useState<{
+    categories: string[];
+    confidence: number[];
+  }>({ categories: [], confidence: [] });
+  const [chartResult, setChartResult] = useState<{
+    categories: string[];
+    confidence: number[];
+  }>({ categories: [], confidence: [] });
+  const SERVER_IP = "http://192.168.20.88";
+  //192.168.20.88 GANTE
+  //192.168.1.188 CASA
   useEffect(() => {
       textAnalysis();
-    //   audioAnalysis();
-    // imagsAnalysis();
+      imagsAnalysis();
+      audioAnalysis();
   }, []);
 
-  const processData = (data: any) => {
+  useEffect(() => {
+    if(selectedOption ==="Conversaciones" && textResult.categories.length>0){
+      handleNavOption("Conversaciones")
+    }
+}, ),textResult; 
+
+  const processData = (data: any, analysis: string) => {
     const categories = Object.keys(data).map(function (clave) {
       return clave;
     });
     const confidence = Object.keys(data).map(function (clave) {
       return data[clave];
     });
-
-    setChartData({ categories, confidence });
+    switch (analysis){
+      case "text":
+        console.log("texto")
+        setTextResult({ categories, confidence })
+        break;
+      case "audio":
+        console.log("audio")
+        setAudioResult({ categories, confidence })
+        break;
+      case "img":
+        console.log("imgs")
+        setImgsResult({ categories, confidence })
+        break;
+    }
   };
   async function obtainPlainTextPromise(promise: Promise<string>) {
     try {
@@ -63,8 +91,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         if (response.ok) {
           const data = await response.json();
           console.log(data);
-          processData(data);
-          //    setTextResult(data)
+          processData(data, "text");
         } else {
           console.error("Request error:", response.status);
         }
@@ -86,8 +113,11 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         },
       });
 
+
       if (response.ok) {
-        return await response.json();
+        const result = await response.json();
+        console.log(result)
+        return result
       } else {
         console.error("Request error:", response.status);
       }
@@ -110,8 +140,8 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         if (response.ok) {
           const data = await response.json();
           const result = await genericTextAnalysis(data.transcript);
-          processData(result);
-          //   setAudioResult(result)
+          console.log(result)
+          processData(result,"audio");
         } else {
           console.error("Request error:", response.status);
         }
@@ -137,13 +167,11 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         );
         if (response.ok) {
           const data = await response.json();
-          
           const result = await genericTextAnalysis(data.description);
           console.log(result)
-          processData(result);
-          // setImgsResult(result)
+          processData(result,"img");
         } else {
-          console.error("Request error:", response.status);
+          console.error("Request error:", response.status, response.body);
         }
       } catch (error) {
         console.error("Error:", error);
@@ -153,20 +181,18 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
 
   const handleNavOption = async (identifier: string): Promise<void> => {
     setSelectedOption(identifier);
-    
-    // Llamar a las funciones de análisis correspondientes según la opción seleccionada
     switch (identifier) {
       case "Conversaciones":
-        textAnalysis();
+        setChartResult(textResult)
         break;
       case "Audios":
-        audioAnalysis();
+        setChartResult(audioResult)
         break;
       case "Imagenes":
-        imagsAnalysis();
+        setChartResult(imgsResult)
         break;
       case "Todos":
-        // Aquí puedes agregar lógica adicional si necesitas manejar la opción "Todos"
+        setChartResult({categories: [],confidence: []})
         break;
       default:
         break;
@@ -212,26 +238,26 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           </li>
         </ul>
         <div className="stats-container">
-          {chartData.categories.length > 0 &&
-          chartData.confidence.length > 0 ? (
+          {chartResult.categories.length > 0 &&
+          chartResult.confidence.length > 0 ? (
             <BarChart
               xAxis={[
                 {
                   id: "barCategories",
-                  data: chartData.categories,
+                  data: chartResult.categories,
                   scaleType: "band",
                 },
               ]}
               series={[
                 {
-                  data: chartData.confidence,
+                  data: chartResult.confidence,
                 },
               ]}
               width={600}
               height={500}
             />
           ) : (
-            <p>No hay datos disponibles para mostrar.</p>
+            <p className="stats-paragraph">No hay datos disponibles para mostrar para {selectedOption}.</p>
           )}
         </div>
       </div>
