@@ -16,7 +16,11 @@ export function Reports() {
         }
         image={ReportsImg}
       />
-      <Stats chat={chatData} imgs={imgData} audios={audioData} />
+      <Stats
+        chat={chatData}
+        imgs={imgData}
+        audios={audioData}
+      />
       <CopyrightFooter />
     </>
   );

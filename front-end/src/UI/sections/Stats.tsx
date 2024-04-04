@@ -1,7 +1,8 @@
 import "./Stats.css";
 import { useEffect, useState } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
-import { PieChart } from '@mui/x-charts/PieChart';
+import { PieChart } from "@mui/x-charts/PieChart";
+import { BarLoader } from "react-spinners";
 
 interface StatsProps {
   chat: File[];
@@ -31,13 +32,33 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     confidence: number[];
   }>({ categories: [], confidence: [] });
   const SERVER_IP = "http://192.168.20.88";
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [textAnalysisComplete, setTextAnalysisComplete] =
+    useState<boolean>(false);
+  const [audioAnalysisComplete, setAudioAnalysisComplete] =
+    useState<boolean>(false);
+  const [imageAnalysisComplete, setImageAnalysisComplete] =
+    useState<boolean>(false);
+
   //192.168.20.88 GANTE
   //192.168.1.188 CASA
   useEffect(() => {
+    setIsLoading(true);
+    console.log("Starting analysis...");
     textAnalysis();
-    imagsAnalysis();
     audioAnalysis();
+    imagsAnalysis();
   }, []);
+
+  useEffect(() => {
+    if (
+      textAnalysisComplete &&
+      audioAnalysisComplete &&
+      imageAnalysisComplete
+    ) {
+      setIsLoading(false);
+    }
+  }, [audioAnalysisComplete, imageAnalysisComplete, textAnalysisComplete]);
 
   useEffect(() => {
     if (
@@ -99,12 +120,15 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           const data = await response.json();
           console.log(data);
           processData(data, "text");
+          setTextAnalysisComplete(true);
         } else {
           console.error("Request error:", response.status);
         }
       } catch (error) {
         console.error("Process request error:", error);
       }
+    } else {
+      setTextAnalysisComplete(true);
     }
   }
 
@@ -148,12 +172,15 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           const result = await genericTextAnalysis(data.transcript);
           console.log(result);
           processData(result, "audio");
+          setAudioAnalysisComplete(true);
         } else {
           console.error("Request error:", response.status);
         }
       } catch (error) {
         console.error("Error:", error);
       }
+    } else {
+      setAudioAnalysisComplete(true);
     }
   }
 
@@ -176,12 +203,15 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           const result = await genericTextAnalysis(data.description);
           console.log(result);
           processData(result, "img");
+          setImageAnalysisComplete(true);
         } else {
           console.error("Request error:", response.status, response.body);
         }
       } catch (error) {
         console.error("Error:", error);
       }
+    } else {
+      setImageAnalysisComplete(true);
     }
   }
 
@@ -211,110 +241,129 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
 
   return (
     <section className="stats-section">
+    {isLoading ? (
+          <><div className="loading-section">
+          <p>Procesando datos</p>
+          <img src="https://1.bp.blogspot.com/-DtWoCh9wbyM/YT4tnJ-NHTI/AAAAAAAAP54/UKIWmZQcGLQxm94xG7QnoRoIHVNE20u9ACLcBGAsYHQ/s300/animated-waiting.gif" alt="Waiting gif" />
+          <BarLoader width={200} height={5}  color="#36d7b7" />
+           </div>
+        
+        </>
+        ) : (
+        
+      <> 
       <div className="container">
-        <ul className="lateral-navigation">
-          <li>
-            <a
-              className={
-                selectedAnalysisOption === "Conversaciones" ? "selected" : ""
-              }
-              onClick={() => handleNavAnalysisOption("Conversaciones")}
-            >
-              Conversaciones
-            </a>
-          </li>
-          <li>
-            <a
-              className={selectedAnalysisOption === "Audios" ? "selected" : ""}
-              onClick={() => handleNavAnalysisOption("Audios")}
-            >
-              Audios
-            </a>
-          </li>
-          <li>
-            <a
-              className={
-                selectedAnalysisOption === "Imagenes" ? "selected" : ""
-              }
-              onClick={() => handleNavAnalysisOption("Imagenes")}
-            >
-              Imagenes
-            </a>
-          </li>
-          <li>
-            <a
-              className={selectedAnalysisOption === "Todos" ? "selected" : ""}
-              onClick={() => handleNavAnalysisOption("Todos")}
-            >
-              Todos
-            </a>
-          </li>
-        </ul>
-        <div className="stats-container">
-          {chartResult.categories.length > 0 &&
-          chartResult.confidence.length > 0 ? (
-            selectedGraphOption === "Barras" ? (
-              <BarChart
-                xAxis={[
-                  {
-                    id: "barCategories",
-                    data: chartResult.categories,
-                    scaleType: "band",
-                  },
-                ]}
-                series={[
-                  {
-                    data: chartResult.confidence,
-                  },
-                ]}
-                width={600}
-                height={500}
-              />
-            ) : (
-              <PieChart
-                series={[
-                  {
-                    data: chartResult.confidence.map((value, index) => ({
-                      id: index,
-                      value: value,
-                      label: chartResult.categories[index], 
-                    })),
-                  },
-                ]}
-                width={450}
-                height={300}
-              />
-            )
-          ) : (
-            <p className="stats-paragraph">
-              No hay datos disponibles para mostrar para{" "}
-              {selectedAnalysisOption}.
-            </p>
-          )}
-        </div>
-        <ul className="lateral-right-navigation">
-          <li>
-            <a
-              className={
-                selectedGraphOption === "Barras" ? "selectedGraph" : ""
-              }
-              onClick={() => handleNavGraphOption("Barras")}
-            >
-              Barras
-            </a>
-          </li>
-          <li>
-            <a
-              className={
-                selectedGraphOption === "Pastel" ? "selectedGraph" : ""
-              }
-              onClick={() => handleNavGraphOption("Pastel")}
-            >
-              Pastel
-            </a>
-          </li>
-        </ul>
+            <ul className="lateral-navigation">
+              <li>
+                <a
+                  className={
+                    selectedAnalysisOption === "Conversaciones"
+                      ? "selected"
+                      : ""
+                  }
+                  onClick={() => handleNavAnalysisOption("Conversaciones")}
+                >
+                  Conversaciones
+                </a>
+              </li>
+              <li>
+                <a
+                  className={
+                    selectedAnalysisOption === "Audios" ? "selected" : ""
+                  }
+                  onClick={() => handleNavAnalysisOption("Audios")}
+                >
+                  Audios
+                </a>
+              </li>
+              <li>
+                <a
+                  className={
+                    selectedAnalysisOption === "Imagenes" ? "selected" : ""
+                  }
+                  onClick={() => handleNavAnalysisOption("Imagenes")}
+                >
+                  Imagenes
+                </a>
+              </li>
+              <li>
+                <a
+                  className={
+                    selectedAnalysisOption === "Todos" ? "selected" : ""
+                  }
+                  onClick={() => handleNavAnalysisOption("Todos")}
+                >
+                  Todos
+                </a>
+              </li>
+            </ul>
+            <div className="stats-container">
+              {chartResult.categories.length > 0 &&
+              chartResult.confidence.length > 0 ? (
+                selectedGraphOption === "Barras" ? (
+                  <BarChart
+                    xAxis={[
+                      {
+                        id: "barCategories",
+                        data: chartResult.categories,
+                        scaleType: "band",
+                      },
+                    ]}
+                    series={[
+                      {
+                        data: chartResult.confidence,
+                      },
+                    ]}
+                    width={600}
+                    height={500}
+                  />
+                ) : (
+                  <PieChart
+                    series={[
+                      {
+                        data: chartResult.confidence.map((value, index) => ({
+                          id: index,
+                          value: value,
+                          label: chartResult.categories[index],
+                        })),
+                      },
+                    ]}
+                    width={450}
+                    height={300}
+                  />
+                )
+              ) : (
+                <p className="stats-paragraph">
+                  No hay datos disponibles para mostrar para{" "}
+                  {selectedAnalysisOption}.
+                </p>
+              )}
+            </div>
+            <ul className="lateral-right-navigation">
+              <li>
+                <a
+                  className={
+                    selectedGraphOption === "Barras" ? "selectedGraph" : ""
+                  }
+                  onClick={() => handleNavGraphOption("Barras")}
+                >
+                  Barras
+                </a>
+              </li>
+              <li>
+                <a
+                  className={
+                    selectedGraphOption === "Pastel" ? "selectedGraph" : ""
+                  }
+                  onClick={() => handleNavGraphOption("Pastel")}
+                >
+                  Pastel
+                </a>
+              </li>
+            </ul>
       </div>
+          </>
+        )}
     </section>
   );
 };
