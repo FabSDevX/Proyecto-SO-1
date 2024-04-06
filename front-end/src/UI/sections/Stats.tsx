@@ -13,6 +13,7 @@ interface StatsProps {
 }
 
 export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
+  let building_text = ""
   const [selectedAnalysisOption, setSelectedAnalysisOption] =
     useState<string>("Conversaciones");
   const [selectedGraphOption, setSelectedGraphOption] =
@@ -29,6 +30,10 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     categories: string[];
     confidence: number[];
   }>({ categories: [], confidence: [] });
+  const [todosResult, setTodosResult] = useState<{
+    categories: string[];
+    confidence: number[];
+  }>({ categories: [], confidence: [] });
   const [chartResult, setChartResult] = useState<{
     categories: string[];
     confidence: number[];
@@ -40,6 +45,8 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
   const [audioAnalysisComplete, setAudioAnalysisComplete] =
     useState<boolean>(false);
   const [imageAnalysisComplete, setImageAnalysisComplete] =
+    useState<boolean>(false);
+  const [todosAnalysisComplete, setTodosAnalysisComplete] =
     useState<boolean>(false);
 
   //192.168.20.88 GANTE
@@ -53,6 +60,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     */
     Promise.all([textAnalysis(), audioAnalysis(), imagsAnalysis()])
       .then(() => {
+        todoAnalysis(building_text);
         setIsLoading(false);
         console.log("All analysis completed.");
       })
@@ -66,12 +74,13 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     if (
       textAnalysisComplete &&
       audioAnalysisComplete &&
-      imageAnalysisComplete
+      imageAnalysisComplete &&
+      todosAnalysisComplete
     ) {
       sentNotificationMessage();
       setIsLoading(false);
     }
-  }, [audioAnalysisComplete, imageAnalysisComplete, textAnalysisComplete]);
+  }, [audioAnalysisComplete, imageAnalysisComplete, textAnalysisComplete, todosAnalysisComplete]);
 
   useEffect(() => {
     if (
@@ -103,6 +112,10 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         console.log("imgs");
         setImgsResult({ categories, confidence });
         break;
+      case "todos":
+        console.log("todos");
+        setTodosResult({ categories, confidence });
+        break;
     }
   };
   async function obtainPlainTextPromise(promise: Promise<string>) {
@@ -131,7 +144,9 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
 
         if (response.ok) {
           const data = await response.json();
+
           console.log(data);
+          building_text += text +  ","
           processData(data, "text");
           setTextAnalysisComplete(true);
         } else {
@@ -169,6 +184,13 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     }
   }
 
+  async function todoAnalysis(text : string){
+    const result = await genericTextAnalysis(text);
+    console.log(text);
+    processData(result, "todos");
+    setTodosAnalysisComplete(true);
+  }
+
   async function audioAnalysis() {
     if (audios != null && audios != undefined && audios.length > 0) {
       const formData = new FormData();
@@ -184,6 +206,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           const data = await response.json();
           const result = await genericTextAnalysis(data.transcript);
           console.log(result);
+          building_text += data.transcript + ","
           processData(result, "audio");
           setAudioAnalysisComplete(true);
         } else {
@@ -215,6 +238,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           const data = await response.json();
           const result = await genericTextAnalysis(data.description);
           console.log(result);
+          building_text += data.description + ","
           processData(result, "img");
           setImageAnalysisComplete(true);
         } else {
@@ -241,7 +265,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         setChartResult(imgsResult);
         break;
       case "Todos":
-        setChartResult({ categories: [], confidence: [] });
+        setChartResult(todosResult);
         break;
       default:
         break;
