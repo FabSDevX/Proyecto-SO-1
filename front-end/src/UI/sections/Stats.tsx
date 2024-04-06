@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { PieChart } from "@mui/x-charts/PieChart";
 import { BarLoader } from "react-spinners";
+import { sentNotificationMessage } from "../../utils/notifications/notification";
+
 
 interface StatsProps {
   chat: File[];
@@ -66,6 +68,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
       audioAnalysisComplete &&
       imageAnalysisComplete
     ) {
+      sentNotificationMessage();
       setIsLoading(false);
     }
   }, [audioAnalysisComplete, imageAnalysisComplete, textAnalysisComplete]);

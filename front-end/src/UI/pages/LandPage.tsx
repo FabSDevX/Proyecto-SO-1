@@ -2,7 +2,12 @@ import { CopyrightFooter } from "../sections/CopyrightFooter";
 import { FileDrag } from "../sections/FileDrag";
 import { Hero } from "../sections/Hero";
 import HeroImg from "@assets/svg/heroImg.svg";
+import { useEffect } from "react";
+import { askNotificationPermission } from "../../utils/notifications/notification";
 export function LandPage() {
+  useEffect(()=>{
+    askNotificationPermission();
+  },[])
   return (
     <>
       <Hero
