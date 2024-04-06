@@ -24,6 +24,13 @@ endpoint = os.getenv('ENDPOINT')
 api_key = os.getenv('API_KEY')
 computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(api_key))
 
+def clean_container():
+    blob_list = container_client.list_blobs()
+    # Delete the uploaded image from Blob Storage
+    for blob in blob_list:
+        blob_client = container_client.get_blob_client(blob.name)
+        blob_client.delete_blob()
+
 @app.route('/', methods=['GET'])
 def index():
     return 'Hello Image'
@@ -31,6 +38,8 @@ def index():
 @app.route('/api/upload_and_describe_image', methods=['POST'])
 def upload_and_describe_image():
     try:
+
+        # clean_container()
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
 
@@ -45,18 +54,20 @@ def upload_and_describe_image():
                                 
                 encriptor = str(uuid.uuid4())
                 # Save the image to a temporary location
-                image_path = 'temp/' + encriptor +'.jpg'
+                image_path = 'temp' + encriptor +'.jpg'
                 print(image_path)
                 image_file.save(image_path)
                 # Generate a unique blob name using UUID
                 blob_name = encriptor + image_file.filename
-                
+               
                 # Upload image to Azure Blob Storage
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
                 with open(image_path, "rb") as image:
                     blob_client.upload_blob(image)
+                
                 # Remove temporary file
-                os.remove(image_path)
+                os.remove(image_path) 
+
                 # Describe the uploaded image
                 blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
                 description_results = computervision_client.describe_image(blob_url)
@@ -65,11 +76,6 @@ def upload_and_describe_image():
                 else:
                     building_text += "No description found. "
                 
-                blob_list = container_client.list_blobs()
-                # Delete the uploaded image from Blob Storage
-                for blob in blob_list:
-                    blob_client = container_client.get_blob_client(blob.name)
-                blob_client.delete_blob()
         return jsonify({'description': building_text})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

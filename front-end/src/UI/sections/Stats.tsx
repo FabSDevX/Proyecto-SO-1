@@ -31,7 +31,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     categories: string[];
     confidence: number[];
   }>({ categories: [], confidence: [] });
-  const SERVER_IP = "http://192.168.20.88";
+  const SERVER_IP = "http://192.168.1.20";
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [textAnalysisComplete, setTextAnalysisComplete] =
     useState<boolean>(false);
@@ -45,9 +45,19 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
   useEffect(() => {
     setIsLoading(true);
     console.log("Starting analysis...");
-    textAnalysis();
-    audioAnalysis();
-    imagsAnalysis();
+
+    /*
+    Server client multiproccesing stage
+    */
+    Promise.all([textAnalysis(), audioAnalysis(), imagsAnalysis()])
+      .then(() => {
+        setIsLoading(false);
+        console.log("All analysis completed.");
+      })
+      .catch((error) => {
+        console.error("Error during analysis:", error);
+        setIsLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -241,18 +251,20 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
 
   return (
     <section className="stats-section">
-    {isLoading ? (
-          <><div className="loading-section">
-          <p>Procesando datos</p>
-          <img src="https://1.bp.blogspot.com/-DtWoCh9wbyM/YT4tnJ-NHTI/AAAAAAAAP54/UKIWmZQcGLQxm94xG7QnoRoIHVNE20u9ACLcBGAsYHQ/s300/animated-waiting.gif" alt="Waiting gif" />
-          <BarLoader width={200} height={5}  color="#36d7b7" />
-           </div>
-        
+      {isLoading ? (
+        <>
+          <div className="loading-section">
+            <p>Procesando datos</p>
+            <img
+              src="https://1.bp.blogspot.com/-DtWoCh9wbyM/YT4tnJ-NHTI/AAAAAAAAP54/UKIWmZQcGLQxm94xG7QnoRoIHVNE20u9ACLcBGAsYHQ/s300/animated-waiting.gif"
+              alt="Waiting gif"
+            />
+            <BarLoader width={200} height={5} color="#36d7b7" />
+          </div>
         </>
-        ) : (
-        
-      <> 
-      <div className="container">
+      ) : (
+        <>
+          <div className="container">
             <ul className="lateral-navigation">
               <li>
                 <a
@@ -361,9 +373,9 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
                 </a>
               </li>
             </ul>
-      </div>
-          </>
-        )}
+          </div>
+        </>
+      )}
     </section>
   );
 };
