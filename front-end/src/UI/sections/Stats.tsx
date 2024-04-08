@@ -167,9 +167,9 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           
           const moderationData = await moderationAlert.json();
 
-          const threshold = 0.90;
+          const threshold = 0.80;
 
-          const categoriesToCheck = ['Illicit Drugs', 'Firearms & Weapons', 'Sexual', 'War & Conflict'];
+          const categoriesToCheck = ['Illicit Drugs', 'Firearms & Weapons', 'Sexual', 'Legal'];
 
           type moderationType = {
             [key: string]: string[]; // Cada propiedad será una categoría con una lista de palabras detectadas
@@ -202,7 +202,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
       return [];
     }
 
-    const illicitDrugs=  ['droga', 'narcótico', 'estupefaciente', 'cocaína', 'cocaina', 'marihuana', 'cannabis', 'heroína', 'opio', 'crack',
+    const illicitDrugs=  ['droga', 'narcótico', 'estupefaciente', 'cocaína', 'cocaina', 'marihuana', 'cannabis', 'heroína',"heroina", 'opio', 'crack',
                           'metanfetamina', 'LSD', 'éxtasis', 'extasis', 'anfetamina', 'MDMA', 'PCP', 'alucinógeno', 'alucinogeno', 'psicodélico',
                           'psicodelico', 'hachís', 'hierba', 'porro', 'pastilla', 'speed', 'perico', 'ácido', 'acido', 'basuco', 'piedra', 'yerba',
                           'cogollo', 'fumar', 'inhalar', 'drogadicción', 'drogadiccion', 'adicción', 'adiccion', 'traficante', 'narcotráfico', 'narcotrafico',
@@ -216,7 +216,51 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
                         'heckler & koch', 'desert eagle', 'disparan', 'calibre', 'balística','balistica', 'municionar', 'recargar',
                         'disparar', 'balacera', 'tiroteo', 'armamento', 'militar', 'policía', 'policia', 'delito armado',
                         'contrabando de armas', 'contrabando', 'tráfico de armas', 'tráfico', 'trafico',
-                        'venta ilegal de armas', 'posesión ilegal de armas', 'posesion ilegal de armas', 'revolver', 'delito']                      
+                        'venta ilegal de armas', 'posesión ilegal de armas', 'posesion ilegal de armas', 'revolver', 'delito']  
+                        
+    const sexual = ['sexo', 'sexualidad', 'erótico', 'erótica', 'erotico', 'erotica', 'pene', 'vagina', 'tetas',
+                    'sensualidad', 'culo', 'coño', 'testiculos', 'testículos', 'ano', 'sensuales',
+                    'sensual', 'deseo', 'placer', 'pasión', 'pasion', 'intimidad', 'lujuria', 'excitación', 'excitante',
+                    'exitacion', 'orgasmo', 'orgásmico', 'orgasmico', 'estimulación', 'estimulacion', 'estimulante',
+                    'coito', 'relaciones', 'sexuales', 'hacer el amor', 'follar', 'actividad sexual', 'acto sexual',
+                    'encuentro íntimo', 'encuentro intimo', 'desnudez', 'desnudo', 'desnuda', 'cuerpo desnudo',
+                    'sexualidad humana', 'relaciones íntimas', 'relaciones intimas', 'intimidad física', 'intimidad fisica', 
+                    'intimidad emocional', 'sexualidad consentida', 'relaciones consensuales', 'consentimiento sexual',
+                    'consentimiento informado', 'orientación sexual', 'identidad de género', 'identidad de genero',
+                    'diversidad sexual', 'homosexualidad', 'bisexualidad', 'heterosexualidad', 'transexualidad', 'trisexualidad',
+                    'polisexualidad', 'pansexualidad', 'fetichismo', 'voyeurismo', 'exhibicionismo', 'BDSM', 'sadomasoquismo',
+                    'fetiche', 'juguetes sexuales', 'estimulación erógena', 'estimulacion erógena', 'estimulación erogena',
+                    'estimulacion erogena', 'pornografía', 'pornografia', 'porno', 'contenido para adultos',
+                    'material sexualmente explícito', 'desnudez artística', 'desnudez artistica', 'contenido NSFW', 
+                    'NSFW', 'Not Safe For Work', 'contenido para mayores de edad', 'contenido sexualmente sugestivo',
+                    'escenas de sexo', 'romance erótico', 'romance erotico', 'literatura erótica', 'literatura erotica',
+                    'juegos sexuales', 'prácticas sexuales', 'practicas sexuales', 'fantasías sexuales', 'fantasias sexuales',
+                    'satisfacción sexual', 'educación sexual', 'educacion sexual', 'salud sexual', 'consentimiento', 'límites sexuales',
+                    'abuso sexual', 'violencia sexual', 'agresión sexual', 'agresion sexual', 'acoso sexual', 'explotación sexual',
+                    'explotacion sexual', 'tráfico sexual', 'trafico sexual', 'puta', 'zorra', 'prostituta', 'perra']      
+                    
+    const legal = ['ilegal', 'policia', 'policía', 'pasamontañas', 'pasa montañas', 'ilicito', 'ilícito', 'delito',
+                  'crimen', 'infracción', 'infraccion', 'ilegalidad', 'fraude', 'corrupción', 'corrupcion', 'soborno', 'extorsión', 
+                  'extorsion', 'malversación', 'malversacion', 'lavado de dinero', 'evasión fiscal', 'fiscal', 'evasion',
+                  'lavado', 'dinero', 'defraudación fiscal', 'defraudacion fiscal', 'fraude fiscal', 'blanqueo de capitales',
+                  'contrabando', 'blanqueo', 'tráfico ilegal', 'trafico', 'trafico ilegal', 'piratería', 'pirateria',
+                  'robo', 'hurto', 'atraco', 'asalto', 'estafa', 'falsificacion', 'falsificacion', 'falsedad documental',
+                  'perjurio', 'soborno', 'cohecho', 'prevaricación', 'prevaricacion', 'negligencia', 'malversación de fondos',
+                  'malversar', 'malversacion de fondos', 'abuso de poder', 'tráfico de influencias', 'trafico de influencias',
+                  'crimen organizado', 'actividad criminal', 'pandilla', 'pandillas', 'bandas', 'banda', 'narco', 'conspiración',
+                  'conspiracion', 'asociación ilícita', 'ilicita', 'ílicita', 'delincuencia', 'delincuente', 'delinquir',
+                  'criminalidad', 'delincuencia organizada', 'encubrimiento', 'complicidad', 'maleante', 'encubridor',
+                  'corrupción política', 'corrupcion política', 'corrupcion politica', 'colusión', 'colusion', 'fraude electoral',
+                  'manipulación del mercado', 'manipulacion del mercado', 'insider trading', 'secuestro', 'chantaje',
+                  'trata de personas', 'trata de blancas', 'blancas', 'explotación laboral', 'explotacion laboral',
+                  'violación de derechos humanos', 'violacion de derechos humanos', 'crímenes de guerra', 'crimenes de guerra',
+                  'tráfico de armas', 'trafico de armas', 'tráfico de drogas', 'trafico de drogas', 'tráfico de personas',
+                  'trafico de personas', 'terrorismo', 'financiamiento del terrorismo', 'piratería informática', 'delitos informáticos',
+                  'delitos informaticos', 'ciberdelincuencia', 'violación de la privacidad', 'violacion de la privacidad',
+                  'privacidad', 'violacion', 'violación', 'espionaje', 'acoso', 'acecho', 'difamación', 'difamacion', 'calumnia', 'injuria',
+                  'acosador', 'acosar', 'hostigar', 'hostigamiento', 'robo de identidad', 'usurpación de identidad', 'usurpar',
+                  'pornografía infantil', 'explotación infantil', 'pornografia infantil', 'explotar', 'abuso sexual infantil', 'abusar',
+                  'evadir', 'falsificar', 'poseción', 'posecion', 'poseer', 'atacar', 'ataque', 'ataco']                
 
     const relevantWords: string[] = []
 
@@ -242,6 +286,26 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           })
           break;
         }
+        case 'Sexual':
+          {
+            sexual.forEach(word => {
+              if(text.toLowerCase().includes(word)){
+                console.log(word)
+                relevantWords.push(word);
+              }
+            })
+            break;
+          } 
+          case 'Legal':
+            {
+              legal.forEach(word => {
+                if(text.toLowerCase().includes(word)){
+                  console.log(word)
+                  relevantWords.push(word);
+                }
+              })
+              break;
+            }                  
     }
     return relevantWords;
   }
@@ -291,8 +355,49 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         if (response.ok) {
           const data = await response.json();
           const result = await genericTextAnalysis(data.transcript);
+
           console.log(result);
           building_text += data.transcript + ","
+
+
+          //Código que añadí para la moderación. PORFAVOR revisar de que no esté jodiendo el análisis del audio    
+          const moderationAlert = await fetch(`${SERVER_IP}:5000/api/moderate`, {
+            method: "POST",
+            body: JSON.stringify({
+              text: data.transcript,
+            }),
+            headers: {
+              "Content-type": "application/json; charset=UTF-8",
+            },
+          });
+  
+          if(moderationAlert.ok){
+            
+            const moderationData = await moderationAlert.json();
+  
+            const threshold = 0.80;
+  
+            const categoriesToCheck = ['Illicit Drugs', 'Firearms & Weapons', 'Sexual', 'War & Conflict'];
+  
+            type moderationType = {
+              [key: string]: string[]; // Cada propiedad será una categoría con una lista de palabras detectadas
+            };
+  
+            const moderationJSON:moderationType = {};
+  
+            categoriesToCheck.forEach(async category => {
+              if (moderationData[category] > threshold) {
+                // Llamar a la función para detectar palabras definidas para esta categoría
+                const detectionResult = await detectCategoryWords(data.transcript, category);
+                moderationJSON[category] = detectionResult;
+                
+              }
+            });
+            console.log(moderationJSON);
+          }   
+          //Código que añadí para la moderación. PORFAVOR revisar de que no esté jodiendo el análisis del audio       
+          
+
           processData(result, "audio");
           setAudioAnalysisComplete(true);
         } else {
@@ -323,6 +428,11 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         if (response.ok) {
           const data = await response.json();
           const result = await genericTextAnalysis(data.description);
+          const moderation_result = data.moderation_list;
+          //EJEMPLO DE PARA DISPARAR LA ALERTA
+          //if(moderation_result.size()>3):
+          //   bla bla bla bla bla;
+          console.log(moderation_result);
           console.log(result);
           building_text += data.description + ","
           processData(result, "img");

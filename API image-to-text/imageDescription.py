@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from azure.cognitiveservices.vision.computervision import ComputerVisionClient
 from msrest.authentication import CognitiveServicesCredentials
 from azure.storage.blob import BlobServiceClient
+from azure.cognitiveservices.vision.contentmoderator import ContentModeratorClient
+from msrest.authentication import CognitiveServicesCredentials
 
 # .env
 load_dotenv()
@@ -23,20 +25,20 @@ container_client = blob_service_client.get_container_client(container_name)
 endpoint = os.getenv('ENDPOINT')
 api_key = os.getenv('API_KEY')
 computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(api_key))
-namesList = []
 
-def clean_container():
-    blob_list = container_client.list_blobs()
-    # Delete the uploaded image from Blob Storage
-    for blob in blob_list:
-        blob_client = container_client.get_blob_client(blob.name)
-        blob_client.delete_blob()
+#Content Moderator credentials and client
+moderator_endpoint = os.getenv('MODERATION_ENDPOINT')
+moderator_key = os.getenv('MODERATION_KEY')
+moderator_client = ContentModeratorClient(endpoint=moderator_endpoint, credentials=CognitiveServicesCredentials(moderator_key))
+
+namesList = []
+moderation_name_list = []
 
 def deleteRelatedImages():
     for name in namesList:
         blob_client = container_client.get_blob_client(name)
         blob_client.delete_blob()
-    namesList.clear()    
+    namesList.clear()         
 
 @app.route('/', methods=['GET'])
 def index():
@@ -50,6 +52,8 @@ def upload_and_describe_image():
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
 
+        #clean moderation_name_list
+        moderation_name_list.clear()  
        
         building_text = ""
         for key in request.files.to_dict(flat=False):
@@ -73,7 +77,7 @@ def upload_and_describe_image():
                 # Upload image to Azure Blob Storage
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
                 with open(image_path, "rb") as image:
-                    blob_client.upload_blob(image)
+                    blob_client.upload_blob(image)              
                 
                 # Remove temporary file
                 os.remove(image_path) 
@@ -85,9 +89,20 @@ def upload_and_describe_image():
                     building_text += description_results.captions[0].text + ' '
                 else:
                     building_text += "No description found. "
+
+                evaluation = moderator_client.image_moderation.evaluate_url_input(
+                    content_type="application/json",
+                    cache_image=True,
+                    data_representation="URL",
+                    value=blob_url
+                )  
+                result = evaluation.as_dict()
+                if((result['is_image_adult_classified'] == True) or (result['is_image_racy_classified'] == True)):
+                    moderation_name_list.append(image_file.filename)
         print(building_text)
-        deleteRelatedImages()       
-        return jsonify({'description': building_text})
+        print(moderation_name_list)
+        deleteRelatedImages()  
+        return jsonify({'description': building_text, 'moderation_list':moderation_name_list})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

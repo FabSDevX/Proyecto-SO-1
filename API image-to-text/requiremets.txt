@@ -4,3 +4,4 @@ pip install Flask-CORS
 pip install azure-cognitiveservices-vision-computervision 
 pip install msrest 
 pip install azure-storage-blob
+pip install --upgrade azure-cognitiveservices-vision-contentmoderator
