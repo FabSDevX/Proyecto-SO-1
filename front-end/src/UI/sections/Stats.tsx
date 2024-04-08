@@ -38,7 +38,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     categories: string[];
     confidence: number[];
   }>({ categories: [], confidence: [] });
-  const SERVER_IP = "http://192.168.1.20";
+  const SERVER_IP = "http://192.168.1.127";
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [textAnalysisComplete, setTextAnalysisComplete] =
     useState<boolean>(false);
@@ -152,12 +152,98 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         } else {
           console.error("Request error:", response.status);
         }
+
+        const moderationAlert = await fetch(`${SERVER_IP}:5000/api/moderate`, {
+          method: "POST",
+          body: JSON.stringify({
+            text: text,
+          }),
+          headers: {
+            "Content-type": "application/json; charset=UTF-8",
+          },
+        });
+
+        if(moderationAlert.ok){
+          
+          const moderationData = await moderationAlert.json();
+
+          const threshold = 0.90;
+
+          const categoriesToCheck = ['Illicit Drugs', 'Firearms & Weapons', 'Sexual', 'War & Conflict'];
+
+          type moderationType = {
+            [key: string]: string[]; // Cada propiedad será una categoría con una lista de palabras detectadas
+          };
+
+          const moderationJSON:moderationType = {};
+
+          categoriesToCheck.forEach(async category => {
+            if (moderationData[category] > threshold) {
+              // Llamar a la función para detectar palabras definidas para esta categoría
+              const detectionResult = await detectCategoryWords(text, category);
+              moderationJSON[category] = detectionResult;
+              
+            }
+          });
+          console.log(moderationJSON);
+        }
+
       } catch (error) {
         console.error("Process request error:", error);
       }
     } else {
       setTextAnalysisComplete(true);
     }
+  }
+
+  async function detectCategoryWords(text: string|undefined, category:string) {
+    if (text === undefined) {
+      console.error('Error: El texto es undefined.');
+      return [];
+    }
+
+    const illicitDrugs=  ['droga', 'narcótico', 'estupefaciente', 'cocaína', 'cocaina', 'marihuana', 'cannabis', 'heroína', 'opio', 'crack',
+                          'metanfetamina', 'LSD', 'éxtasis', 'extasis', 'anfetamina', 'MDMA', 'PCP', 'alucinógeno', 'alucinogeno', 'psicodélico',
+                          'psicodelico', 'hachís', 'hierba', 'porro', 'pastilla', 'speed', 'perico', 'ácido', 'acido', 'basuco', 'piedra', 'yerba',
+                          'cogollo', 'fumar', 'inhalar', 'drogadicción', 'drogadiccion', 'adicción', 'adiccion', 'traficante', 'narcotráfico', 'narcotrafico',
+                          'distribuidor', 'dealer', 'narcotraficante', 'narco', 'cartel', 'contrabando', 'clandestino', 'adicto', 'drogodependiente',
+                          'consumo', 'dosis', 'drogarse', 'drogando', 'sobredosis', 'síndrome de abstinencia', 'hachis'];
+
+    const gunsWeapons = ['arma', 'arma de fuego', 'pistola', 'revólver', 'rifle', 'escopeta', 'fusil', 'metralleta', 'ametralladora',
+                        'subfusil', 'munición', 'municion', 'bala', 'cartucho', 'cargador', 'gatillo', 'cañón', 
+                        'cañon', 'culata', 'mira', 'silenciador', 'corredera', 'recámara', 'recamara', 'fusil de asalto', 'ak-47',
+                        'ar-15', 'uzi', 'beretta', 'glock', 'colt', 'smith & wesson', 'browning', 'winchester', 'wossberg', 
+                        'heckler & koch', 'desert eagle', 'disparan', 'calibre', 'balística','balistica', 'municionar', 'recargar',
+                        'disparar', 'balacera', 'tiroteo', 'armamento', 'militar', 'policía', 'policia', 'delito armado',
+                        'contrabando de armas', 'contrabando', 'tráfico de armas', 'tráfico', 'trafico',
+                        'venta ilegal de armas', 'posesión ilegal de armas', 'posesion ilegal de armas', 'revolver', 'delito']                      
+
+    const relevantWords: string[] = []
+
+    switch(category)
+    {
+      case 'Illicit Drugs':
+        {
+          illicitDrugs.forEach(word => {
+            if(text.toLowerCase().includes(word)){
+              console.log(word)
+              relevantWords.push(word);
+            }
+          })
+          break;
+        }
+      case 'Firearms & Weapons':
+        {
+          gunsWeapons.forEach(word => {
+            if(text.toLowerCase().includes(word)){
+              console.log(word)
+              relevantWords.push(word);
+            }
+          })
+          break;
+        }
+    }
+    return relevantWords;
   }
 
   async function genericTextAnalysis(description: string) {
@@ -244,6 +330,9 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         } else {
           console.error("Request error:", response.status, response.body);
         }
+
+
+        
       } catch (error) {
         console.error("Error:", error);
       }

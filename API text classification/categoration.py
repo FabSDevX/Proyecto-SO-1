@@ -37,6 +37,22 @@ def classify(text):
     print(result)
     return result
 
+def moderate(text):
+    document = language_v2.Document(
+        content=text, type_=language_v2.Document.Type.PLAIN_TEXT
+    )
+
+    result = {}
+
+    moderation = language_client.moderate_text(request={"document": document})
+    categories = moderation.moderation_categories
+
+    for category in categories:
+        result[category.name] = category.confidence
+
+    return result
+
+
 @app.route('/', methods=['GET'])
 def index():
     return "Hola Mundo"
@@ -46,6 +62,17 @@ def api_classify():
     text = request.json.get('text')
     if text:
         result = classify(text)
+        print(jsonify(result))
+        return jsonify(result)
+    else:
+        return jsonify({"error": "No text provided"}), 400
+    
+@app.route('/api/moderate', methods=['POST'])
+def api_moderate():
+    text = request.json.get('text')
+    if text:
+        result = moderate(text)
+        print(jsonify(result))
         return jsonify(result)
     else:
         return jsonify({"error": "No text provided"}), 400

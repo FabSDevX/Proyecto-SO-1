@@ -23,6 +23,7 @@ container_client = blob_service_client.get_container_client(container_name)
 endpoint = os.getenv('ENDPOINT')
 api_key = os.getenv('API_KEY')
 computervision_client = ComputerVisionClient(endpoint, CognitiveServicesCredentials(api_key))
+namesList = []
 
 def clean_container():
     blob_list = container_client.list_blobs()
@@ -30,6 +31,12 @@ def clean_container():
     for blob in blob_list:
         blob_client = container_client.get_blob_client(blob.name)
         blob_client.delete_blob()
+
+def deleteRelatedImages():
+    for name in namesList:
+        blob_client = container_client.get_blob_client(name)
+        blob_client.delete_blob()
+    namesList.clear()    
 
 @app.route('/', methods=['GET'])
 def index():
@@ -59,6 +66,9 @@ def upload_and_describe_image():
                 image_file.save(image_path)
                 # Generate a unique blob name using UUID
                 blob_name = encriptor + image_file.filename
+
+                if blob_name not in namesList:
+                    namesList.append(blob_name)
                
                 # Upload image to Azure Blob Storage
                 blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
@@ -67,15 +77,16 @@ def upload_and_describe_image():
                 
                 # Remove temporary file
                 os.remove(image_path) 
-
+                print("Hola")
                 # Describe the uploaded image
                 blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
-                description_results = computervision_client.describe_image(blob_url)
+                description_results = computervision_client.describe_image(blob_url, language = "es")
                 if description_results.captions:
                     building_text += description_results.captions[0].text + ' '
                 else:
                     building_text += "No description found. "
-                
+        print(building_text)
+        deleteRelatedImages()       
         return jsonify({'description': building_text})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
