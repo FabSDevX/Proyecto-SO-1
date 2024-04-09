@@ -34,11 +34,9 @@ moderator_client = ContentModeratorClient(endpoint=moderator_endpoint, credentia
 namesList = []
 moderation_name_list = []
 
-def deleteRelatedImages():
-    for name in namesList:
-        blob_client = container_client.get_blob_client(name)
-        blob_client.delete_blob()
-    namesList.clear()         
+def delete_blob(self, blob_service_client: BlobServiceClient, container_name: str, blob_name: str):
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+    blob_client.delete_blob()
 
 @app.route('/', methods=['GET'])
 def index():
@@ -53,9 +51,9 @@ def upload_and_describe_image():
             return jsonify({'error': 'No image provided'}), 400
 
         #clean moderation_name_list
-        # moderation_name_list.clear()  
+        moderation_name_list.clear()  
        
-        building_text = ""
+        building_text = " "
         for key in request.files.to_dict(flat=False):
             for value in request.files.getlist(key):
                 image_file = value
@@ -65,12 +63,10 @@ def upload_and_describe_image():
                                 
                 encriptor = str(uuid.uuid4())
                 # Save the image to a temporary location
-                image_path = 'temp' + encriptor +'.jpg'
-                print(image_path)
+                image_path = 'temp' + encriptor
                 image_file.save(image_path)
                 # Generate a unique blob name using UUID
-                blob_name = encriptor + image_file.filename
-
+                blob_name = image_path
                 if blob_name not in namesList:
                     namesList.append(blob_name)
                
@@ -81,27 +77,33 @@ def upload_and_describe_image():
                 
                 # Remove temporary file
                 os.remove(image_path) 
-                print("Hola")
+                
                 # Describe the uploaded image
-                blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
-                description_results = computervision_client.describe_image(blob_url, language = "es")
-                if description_results.captions:
-                    building_text += description_results.captions[0].text + ' '
-                else:
-                    building_text += "No description found. "
-
-                evaluation = moderator_client.image_moderation.evaluate_url_input(
-                    content_type="application/json",
-                    cache_image=True,
-                    data_representation="URL",
-                    value=blob_url
-                )  
-                result = evaluation.as_dict()
-                if((result['is_image_adult_classified'] == True) or (result['is_image_racy_classified'] == True)):
-                    moderation_name_list.append(image_file.filename)
+                try:
+                    blob_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
+                    description_results = computervision_client.describe_image(blob_url, language = "es")
+                    if description_results.captions:
+                        building_text += description_results.captions[0].text + ' '
+                    else:
+                        building_text += "No description found. "
+                        
+                    try:
+                        evaluation = moderator_client.image_moderation.evaluate_url_input(
+                            content_type="application/json",
+                            cache_image=True,
+                            data_representation="URL",
+                            value=blob_url
+                        )  
+                        result = evaluation.as_dict()
+                        print(blob_name,result)
+                        if((result['is_image_adult_classified'] == True) or (result['is_image_racy_classified'] == True)):
+                            moderation_name_list.append(image_file.filename)
+                    except Exception as e:
+                        print(str(e))
+                except Exception as e:
+                    print(str(e))
+                delete_blob(self=upload_and_describe_image,blob_service_client=blob_service_client, container_name=container_name, blob_name=blob_name)
         print(building_text)
-        print(moderation_name_list)
-        deleteRelatedImages()  
         return jsonify({'description': building_text, 'moderation_list':moderation_name_list})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

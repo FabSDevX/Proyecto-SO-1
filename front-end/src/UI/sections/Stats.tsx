@@ -336,6 +336,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
 
   async function todoAnalysis(text : string){
     const result = await genericTextAnalysis(text);
+    
     console.log(text);
     processData(result, "todos");
     setTodosAnalysisComplete(true);
@@ -427,7 +428,9 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         );
         if (response.ok) {
           const data = await response.json();
+          
           const result = await genericTextAnalysis(data.description);
+          
           const moderation_result = data.moderation_list;
           //EJEMPLO DE PARA DISPARAR LA ALERTA
           //if(moderation_result.size()>3):

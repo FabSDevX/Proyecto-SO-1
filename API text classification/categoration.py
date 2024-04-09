@@ -60,7 +60,11 @@ def index():
 @app.route('/api/classify', methods=['POST'])
 def api_classify():
     text = request.json.get('text')
+    print(type(text))
     if text:
+        
+        if(len(text) < 4):
+            text = "No sufiente informacion"
         result = classify(text)
         print(jsonify(result))
         return jsonify(result)
@@ -71,6 +75,8 @@ def api_classify():
 def api_moderate():
     text = request.json.get('text')
     if text:
+        if(len(text) < 4):
+            text = "No sufiente informacion"
         result = moderate(text)
         print(jsonify(result))
         return jsonify(result)
