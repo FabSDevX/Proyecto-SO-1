@@ -38,7 +38,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     categories: string[];
     confidence: number[];
   }>({ categories: [], confidence: [] });
-  const SERVER_IP = "http://192.168.1.127";
+  const SERVER_IP = "http://192.168.20.88";
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [textAnalysisComplete, setTextAnalysisComplete] =
     useState<boolean>(false);

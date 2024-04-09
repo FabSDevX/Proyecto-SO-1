@@ -53,7 +53,7 @@ def upload_and_describe_image():
             return jsonify({'error': 'No image provided'}), 400
 
         #clean moderation_name_list
-        moderation_name_list.clear()  
+        # moderation_name_list.clear()  
        
         building_text = ""
         for key in request.files.to_dict(flat=False):
