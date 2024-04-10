@@ -25,7 +25,7 @@ def transcribe_audio():
         # Check if the request contains a file
         if 'audio_file' not in request.files:
             return jsonify({'error': 'No file part'}), 400
-        building_text = ""
+        building_text = " "
         for key in request.files.to_dict(flat=False):
             for value in request.files.getlist(key):
                 audio_file = value
