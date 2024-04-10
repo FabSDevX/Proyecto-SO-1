@@ -229,7 +229,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
           }
         });
         console.log(moderationJSON);
-        setAudioModeration(moderationData)
+        setAudioModeration(moderationJSON)
 
         processData(result, "audio");
         setAudioAnalysisComplete(true);
@@ -250,18 +250,19 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
       try {
         const data = await videoAnalysisApi(formData);
         const result = await genericTextAnalysis(data.description);
-
         const moderation_result = data.moderation_list;
-        if (moderation_result.size() >= 1) {
+        if (moderation_result.length >= 1) {
           setImageAlert(true);
           setTodosAlert(true);
+          
         }
-        //EJEMPLO DE PARA DISPARAR LA ALERTA
-        //if(moderation_result.size()>3):
-        //   bla bla bla bla bla;
+        const moderation_json = {"imagen":moderation_result}
+        setimageModeration(moderation_json);
+        console.log(" asfasf");
         console.log(moderation_result);
-        setimageModeration(moderation_result);
         console.log(result);
+        console.log(data);
+        console.log(" asfasf");
         building_text += data.description + ",";
         processData(result, "img");
         setImageAnalysisComplete(true);
@@ -300,14 +301,12 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
   const handleShowModal = () => {
     const reasons: {
       option: string;
-      category: string;
       words: moderationType[];
     }[] = [];
   
     if (audioAlert && audioModeration) {
       reasons.push({
         option: "Audios",
-        category: "Audio",
         words: Array.isArray(audioModeration) ? audioModeration : [audioModeration],
       });
     }
@@ -315,7 +314,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     if (textAlert && textModeration) {
       reasons.push({
         option: "Conversaciones",
-        category: "Texto",
         words: Array.isArray(textModeration) ? textModeration : [textModeration],
       });
     }
@@ -323,7 +321,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     if (imageAlert && imageModeration) {
       reasons.push({
         option: "Imagenes",
-        category: "Imagen",
         words: Array.isArray(imageModeration) ? imageModeration : [imageModeration],
       });
     }
