@@ -95,13 +95,16 @@ def upload_and_describe_image():
                             value=blob_url
                         )  
                         result = evaluation.as_dict()
+                        threshold = 0.8
                         print(blob_name,result)
-                        if((result['is_image_adult_classified'] == True) or (result['is_image_racy_classified'] == True)):
+                        if((result['is_image_adult_classified'] == True and result['adult_classification_score'] >= threshold ) or (result['is_image_racy_classified'] == True and result['racy_classification_score'] >= threshold)):
                             moderation_name_list.append(image_file.filename)
                     except Exception as e:
                         print(str(e))
+                        delete_blob(self=upload_and_describe_image,blob_service_client=blob_service_client, container_name=container_name, blob_name=blob_name)
                 except Exception as e:
                     print(str(e))
+                    delete_blob(self=upload_and_describe_image,blob_service_client=blob_service_client, container_name=container_name, blob_name=blob_name)
                 delete_blob(self=upload_and_describe_image,blob_service_client=blob_service_client, container_name=container_name, blob_name=blob_name)
         print(building_text)
         return jsonify({'description': building_text, 'moderation_list':moderation_name_list})

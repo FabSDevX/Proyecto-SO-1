@@ -10,6 +10,7 @@ export function LandPage() {
   },[])
   return (
     <>
+    <div>
       <Hero
         title={
           "Analizador de conversaciones de WhatsApp para textos, audios e imágenes"
@@ -18,9 +19,10 @@ export function LandPage() {
           "Identifica categorias de interes, temas y posibles incidencias de comportamientos o de relevancia en las conversaciones de whatsapp y recibe reportes retroalimentativos"
         }
         image={HeroImg}
-      />
+        />
       <FileDrag />
       <CopyrightFooter />
+    </div>
     </>
   );
 }

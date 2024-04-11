@@ -1,0 +1,38 @@
+#modal-modal-title span{
+    color: red;
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    font-size: 30px;
+}
+
+#modal-modal-title p{
+    display: flex;
+    justify-content: left;
+    text-align: left;
+    font-weight: 300;
+    margin: 0px;
+}
+.modal-ul{
+    list-style-type: disclosure-closed;
+}
+
+.modal-li{
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-category{
+    font-weight: 700;
+}
+
+.modal-item{
+    font-weight: 400;
+}
+
+
+@media screen and (max-width: 480px ) {
+    .css-1wnsr1i{
+        width: 50%;
+    }
+  }

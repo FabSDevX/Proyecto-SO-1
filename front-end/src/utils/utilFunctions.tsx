@@ -30,7 +30,6 @@ export async function detectCategoryWords(
   }
 
   const relevantWords: string[] = [];
-
   switch (category) {
     case "Illicit Drugs": {
       illicitDrugs.forEach((word) => {
@@ -64,6 +63,9 @@ export async function detectCategoryWords(
       });
       break;
     }
+  }
+  if(relevantWords.length == 0){
+    relevantWords.push("Palabras no encontrada por nuestro sistema")
   }
   return relevantWords;
 }

@@ -15,7 +15,7 @@ import {
   obtainPlainTextPromise,
 } from "../../utils/utilFunctions";
 import { contentModerationApi } from "../../utils/apis/apisModerateResultsCalls";
-import { moderationType } from "../../types/types";
+import { Data, moderationType } from "../../types/types";
 import alarm from "@assets/alarm.png";
 import { AlertModal } from "../modals/alertModal";
 
@@ -69,9 +69,10 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
   const [imageModeration, setimageModeration] = useState<moderationType>();
   const [showModal, setShowModal] = useState(false);
   const [alertReasons, setAlertReasons] = useState<{ option: string; category: string; words: moderationType[] }[]>([]);
-
+  
 
   useEffect(() => {
+    const start = Date.now();
     setIsLoading(true);
     console.log("Starting analysis...");
 
@@ -82,6 +83,8 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
       .then(() => {
         todoAnalysis(building_text);
         setIsLoading(false);
+        const millis = Date.now() - start;
+        console.log(`seconds elapsed = ${Math.floor(millis / 1000)}`);
         console.log("All analysis completed.");
       })
       .catch((error) => {
@@ -106,11 +109,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     textAnalysisComplete,
     todosAnalysisComplete,
   ]);
-  useEffect(() => {
-    if (textAlert || imageAlert || audioAlert || todosAlert) {
-      console.log("Alerta");
-    }
-  }, [textAlert, imageAlert, audioAlert, todosAlert]);
 
   useEffect(() => {
     if (
@@ -119,10 +117,8 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
     ) {
       handleNavAnalysisOption("Conversaciones");
     }
-  }),
-    textResult;
-
-  const processData = (data: any, analysis: string) => {
+  }), textResult;
+  const processData = (data: Data , analysis: string) => {
     const categories = Object.keys(data).map(function (clave) {
       return clave;
     });
@@ -156,7 +152,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         setTextAnalysisComplete(true);
 
         const moderationData = await contentModerationApi(text);
-        console.log(moderationData);
         const threshold = 0.8;
 
         const moderationJSON: moderationType = {};
@@ -181,7 +176,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
   async function genericTextAnalysis(description: string) {
     try {
       const result = await textAnalysisApi(description);
-      console.log(result);
       return result;
     } catch (error) {
       console.error("Process request error:", error);
@@ -203,12 +197,9 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
       try {
         const data = await audioAnalysisApi(formData);
         const result = await genericTextAnalysis(data.transcript);
-
-        console.log(result);
         building_text += data.transcript + ",";
 
         const moderationData = await contentModerationApi(data.transcript);
-        console.log(moderationData);
         const threshold = 0.8;
 
         type moderationType = {
@@ -228,7 +219,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
             moderationJSON[category] = detectionResult;
           }
         });
-        console.log(moderationJSON);
         setAudioModeration(moderationJSON)
 
         processData(result, "audio");
@@ -258,11 +248,6 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
         }
         const moderation_json = {"imagen":moderation_result}
         setimageModeration(moderation_json);
-        console.log(" asfasf");
-        console.log(moderation_result);
-        console.log(result);
-        console.log(data);
-        console.log(" asfasf");
         building_text += data.description + ",";
         processData(result, "img");
         setImageAnalysisComplete(true);
@@ -428,7 +413,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
                 {chartResult.categories.length > 0 &&
                 chartResult.confidence.length > 0 ? (
                   selectedGraphOption === "Barras" ? (
-                    <BarChart
+                    <BarChart className="barchar"
                       xAxis={[
                         {
                           id: "barCategories",
@@ -441,7 +426,7 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
                           data: chartResult.confidence,
                         },
                       ]}
-                      width={600}
+                      width={500}
                       height={500}
                     />
                   ) : (
@@ -452,11 +437,12 @@ export const Stats: React.FC<StatsProps> = ({ chat, imgs, audios }) => {
                             id: index,
                             value: value,
                             label: chartResult.categories[index],
+                        
                           })),
                         },
                       ]}
-                      width={450}
-                      height={300}
+                      width={400}
+                      height={400}
                     />
                   )
                 ) : (
