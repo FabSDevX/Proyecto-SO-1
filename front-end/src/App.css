@@ -1,0 +1,9 @@
+*{
+  scrollbar-color: #01E576 white;
+  scrollbar-width: auto;
+}
+
+body {  
+  margin: 0;
+  padding: 0;
+}

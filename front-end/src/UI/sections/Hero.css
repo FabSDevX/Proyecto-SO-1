@@ -1,0 +1,51 @@
+.hero-container{
+    display: flex;
+    flex-direction: row;
+    max-width: 1024px;
+    margin: 10px auto 10px auto;
+}
+
+.hero-left h1{
+    font-size: xx-large;
+    word-wrap: break-word;
+    max-width: 450px;
+}
+
+.hero-left p {
+    word-wrap: break-word;
+    font-size: large;
+    max-width: 450px;
+    
+}
+
+.hero-right{
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.hero-right img{
+    border-radius: 20px;
+    max-width: 100%;
+    height: 300px;
+}
+
+@media screen and (max-width: 800px) {
+    .hero-container{
+        flex-direction: column;
+        margin: 0 auto;
+    }
+    
+    .hero-left h1 , p{
+        max-width: 100%;
+    }
+
+    .hero-right{
+        display: flex;
+        flex: 0;
+        justify-content: left;
+    }
+    .hero-right img{
+        height: auto;
+    }
+  }
